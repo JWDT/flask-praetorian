@@ -693,12 +693,6 @@ class TestPraetorian:
             assert token in notify['message']
             assert notify['message'] == outbox[0].html
 
-            # test we got an expected confirmation URI
-            assert notify['confirmation_uri'].endswith(
-                'unprotected/{}'.format(notify['token'])
-            )
-
-            # test for no errors
             assert not notify['result']
 
         # test our token is good

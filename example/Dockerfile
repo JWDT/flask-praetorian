@@ -3,17 +3,21 @@ FROM python:3.6.8-stretch
 ARG port
 ARG service
 
-RUN mkdir /logs
+RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+RUN ln -s /root/.poetry/bin/poetry /bin/poetry
+RUN poetry config settings.virtualenvs.create false
 
-COPY ./setup.py /app/
-COPY ./.project_metadata.json /app/
-COPY ./README.rst /app/
-COPY ./flask_praetorian/ /app/flask_praetorian
-COPY ./example/runner.py /app/
+RUN mkdir /logs
+RUN mkdir /app
+
+COPY ./pyproject.toml /app
+COPY ./poetry.lock /app
+COPY ./example/runner.py /app
 
 WORKDIR /app
-RUN pip install .[dev]
+RUN poetry install
 
-# Note that example.py is expected to be put in place by docker-compose
+# Note that example.py and the praetorian source directory need to be mounted
+# as volumes
 
 CMD ["python", "example.py", "--port=5000", "--logfile=/logs/example.log"]

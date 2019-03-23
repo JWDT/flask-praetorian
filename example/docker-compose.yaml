@@ -6,6 +6,8 @@ services:
     build:
       context: ../
       dockerfile: example/Dockerfile
+    volumes:
+      - ./flask_praetorian/:/app/flask_praetorian
     command: /bin/true
 
   basic:
