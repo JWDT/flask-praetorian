@@ -1,74 +1,74 @@
 version: "3.3"
 services:
 
-  praetorian:
-    image: praetorian:local
+  basic:
     build:
       context: ../
       dockerfile: example/Dockerfile
     volumes:
-      - ./flask_praetorian/:/app/flask_praetorian
-    command: /bin/true
-
-  basic:
-    image: praetorian:local
-    depends_on:
-      - praetorian
-    volumes:
-      - "./basic.py:/app/example.py"
+      - ../flask_praetorian/:/app/flask_praetorian
+      - ./:/app
     ports:
-      - "5000:5000"
+      - 5000:5000
+    environment:
+      - FLASK_APP=/app/app_factory:create_app
+      - EXAMPLE=basic
+      - EXAMPLE_LOG=/logs/example.log
 
   refresh:
-    image: praetorian:local
-    depends_on:
-      - praetorian
+    build:
+      context: ../
+      dockerfile: example/Dockerfile
     volumes:
-      - "./refresh.py:/app/example.py"
+      - ../flask_praetorian/:/app/flask_praetorian
+      - ./refresh.py:/app/example.py
     ports:
-      - "5010:5000"
+      - 5010:5000
 
   blacklist:
-    image: praetorian:local
-    depends_on:
-      - praetorian
+    build:
+      context: ../
+      dockerfile: example/Dockerfile
     volumes:
-      - "./blacklist.py:/app/example.py"
+      - ../flask_praetorian/:/app/flask_praetorian
+      - ./blacklist.py:/app/example.py
     ports:
-      - "5020:5000"
+      - 5020:5000
 
   custom:
-    image: praetorian:local
-    depends_on:
-      - praetorian
+    build:
+      context: ../
+      dockerfile: example/Dockerfile
     volumes:
-      - "./custom_claims.py:/app/example.py"
+      - ../flask_praetorian/:/app/flask_praetorian
+      - ./custom_claims.py:/app/example.py
     ports:
-      - "5030:5000"
+      - 5030:5000
 
   register:
-    image: praetorian:local
-    depends_on:
-      - praetorian
+    build:
+      context: ../
+      dockerfile: example/Dockerfile
     volumes:
-      - "./register.py:/app/example.py"
+      - ../flask_praetorian/:/app/flask_praetorian
+      - ./register.py:/app/example.py
     ports:
-      - "5040:5000"
+      - 5040:5000
 
   tool:
-    image: praetorian:local
-    depends_on:
-      - praetorian
+    build:
+      context: ../
+      dockerfile: example/Dockerfile
     volumes:
-      - "./api_tool.py:/app/example.py"
-      - "./static/:/app/static/"
-      - "./templates/:/app/templates/"
+      - ../flask_praetorian/:/app/flask_praetorian
+      - ./api_tool.py:/app/example.py
+      - ./static/:/app/static/
+      - ./templates/:/app/templates/
     ports:
-      - "5050:5000"
+      - 5050:5000
 
   mailer:
     image: namshi/smtp
     restart: always
     ports:
-      - "25:25"
-
+      - 25:25

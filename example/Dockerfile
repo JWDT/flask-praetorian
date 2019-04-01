@@ -1,3 +1,7 @@
+# Note that specific example to be built needs to be volume-mouted as
+# /app/example.py and the praetorian source directory need to be volume-mounted
+# as /app/flask_praetorian
+
 FROM python:3.6.8-stretch
 
 ARG port
@@ -8,16 +12,12 @@ RUN ln -s /root/.poetry/bin/poetry /bin/poetry
 RUN poetry config settings.virtualenvs.create false
 
 RUN mkdir /logs
+
 RUN mkdir /app
-
-COPY ./pyproject.toml /app
-COPY ./poetry.lock /app
-COPY ./example/runner.py /app
-
 WORKDIR /app
+COPY poetry.lock /app/poetry.lock
+COPY pyproject.toml /app/pyproject.toml
 RUN poetry install
+VOLUME /app
 
-# Note that example.py and the praetorian source directory need to be mounted
-# as volumes
-
-CMD ["python", "example.py", "--port=5000", "--logfile=/logs/example.log"]
+CMD ["flask", "run"]
