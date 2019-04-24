@@ -31,7 +31,7 @@ def create_app(config_file=None):
 
     # Initialize a local database for the example
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}'.format(
-        tempfile.NamedTemporaryFile(prefix='local', suffix='.db')
+        tempfile.NamedTemporaryFile(prefix='local', suffix='.db', delete=True)
     )
     db.init_app(app)
 
@@ -46,6 +46,7 @@ def create_app(config_file=None):
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.DEBUG)
         app.logger.addHandler(file_handler)
+        app.logger.info("logging to {log_file}".format(log_file=log_file))
 
     routes = importlib.import_module(os.environ['EXAMPLE'])
     routes.register_routes(app)

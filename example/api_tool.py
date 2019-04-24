@@ -68,6 +68,7 @@ def create_app():
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.DEBUG)
         app.logger.addHandler(file_handler)
+        app.logger.info("logging to {log_file}".format(log_file=log_file))
 
     app.add_url_rule('/', view_func=basic)
     app.add_url_rule('/basic', view_func=basic)
