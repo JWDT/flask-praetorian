@@ -2,21 +2,29 @@ import flask
 import importlib
 import logging
 import os
+import pendulum
 import tempfile
 
 from extensions import guard, db, cors
 from users import User
 
 
-def create_app():
+def fetch_env(app, key, default=None):
+    app.config[key] = os.environ.get(key, default)
+
+
+def create_app(config_file=None):
     """
     Use the app factory pattern to create a flask app for the example
     """
     app = flask.Flask(__name__)
     app.debug = True
     app.config['SECRET_KEY'] = 'top secret'
-    app.config['JWT_ACCESS_LIFESPAN'] = {'hours': 24}
-    app.config['JWT_REFRESH_LIFESPAN'] = {'days': 30}
+    fetch_env(app, 'JWT_ACCESS_LIFESPAN', default=pendulum.duration(hours=24))
+    fetch_env(app, 'JWT_REFRESH_LIFESPAN', default=pendulum.duration(days=30))
+    fetch_env(app, 'PRAETORIAN_CONFIRMATION_SENDER')
+    fetch_env(app, 'PRAETORIAN_CONFIRMATION_SUBJECT')
+    fetch_env(app, 'MAIL_SERVER')
 
     # Initialize the flask-praetorian instance for the app
     guard.init_app(app, User)
@@ -40,4 +48,6 @@ def create_app():
         app.logger.addHandler(file_handler)
 
     routes = importlib.import_module(os.environ['EXAMPLE'])
-    # routes.register_routes(app)
+    routes.register_routes(app)
+
+    return app

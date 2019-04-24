@@ -11,6 +11,9 @@ class User(db.Model):
     password = db.Column(db.Text)
     roles = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True, server_default='true')
+    firstname = db.Column(db.Text)
+    surname = db.Column(db.Text)
+    nickname = db.Column(db.Text)
 
     @property
     def rolenames(self):

@@ -1,3 +1,4 @@
+import datetime
 import flask
 import jwt
 import pendulum
@@ -7,12 +8,11 @@ import uuid
 import warnings
 
 from jinja2 import Template
-from flask import url_for
 from flask_mail import Message
 
 from passlib.context import CryptContext
 
-from flask_praetorian.utilities import deprecated
+from flask_praetorian.utilities import deprecated, duration_from_string
 
 from flask_praetorian.exceptions import (
     AuthenticationError,
@@ -28,6 +28,7 @@ from flask_praetorian.exceptions import (
     MissingClaimError,
     MissingTokenHeader,
     MissingUserError,
+    ConfigurationError,
     PraetorianError,
 )
 
@@ -129,14 +130,14 @@ class Praetorian:
             'JWT_ALGORITHM',
             DEFAULT_JWT_ALGORITHM,
         )
-        self.access_lifespan = pendulum.Duration(**app.config.get(
+        self.access_lifespan = app.config.get(
             'JWT_ACCESS_LIFESPAN',
             DEFAULT_JWT_ACCESS_LIFESPAN,
-        ))
-        self.refresh_lifespan = pendulum.Duration(**app.config.get(
+        )
+        self.refresh_lifespan = app.config.get(
             'JWT_REFRESH_LIFESPAN',
             DEFAULT_JWT_REFRESH_LIFESPAN,
-        ))
+        )
         self.header_name = app.config.get(
             'JWT_HEADER_NAME',
             DEFAULT_JWT_HEADER_NAME,
@@ -164,6 +165,24 @@ class Praetorian:
         self.confirmation_subject = app.config.get(
             'PRAETORIAN_CONFIRMATION_SUBJECT',
             DEFAULT_CONFIRMATION_SUBJECT,
+        )
+
+        if isinstance(self.access_lifespan, dict):
+            self.access_lifespan = pendulum.duration(**self.access_lifespan)
+        elif isinstance(self.access_lifespan, str):
+            self.access_lifespan = duration_from_string(self.access_lifespan)
+        ConfigurationError.require_condition(
+            isinstance(self.access_lifespan, datetime.timedelta),
+            "access lifespan was not configured",
+        )
+
+        if isinstance(self.refresh_lifespan, dict):
+            self.refresh_lifespan = pendulum.duration(**self.refresh_lifespan)
+        if isinstance(self.refresh_lifespan, str):
+            self.refresh_lifespan = duration_from_string(self.refresh_lifespan)
+        ConfigurationError.require_condition(
+            isinstance(self.refresh_lifespan, datetime.timedelta),
+            "refresh lifespan was not configured",
         )
 
         if not app.config.get('DISABLE_PRAETORIAN_ERROR_HANDLER'):

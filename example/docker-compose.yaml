@@ -11,9 +11,11 @@ services:
     ports:
       - 5000:5000
     environment:
-      - FLASK_APP=/app/app_factory:create_app
+      - FLASK_APP=/app/app_factory.py
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_RUN_PORT=5000
       - EXAMPLE=basic
-      - EXAMPLE_LOG=/logs/example.log
+      - EXAMPLE_LOG=/logs/basic.log
 
   refresh:
     build:
@@ -21,9 +23,17 @@ services:
       dockerfile: example/Dockerfile
     volumes:
       - ../flask_praetorian/:/app/flask_praetorian
-      - ./refresh.py:/app/example.py
+      - ./:/app
     ports:
       - 5010:5000
+    environment:
+      - FLASK_APP=/app/app_factory.py
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_RUN_PORT=5010
+      - EXAMPLE=refresh
+      - EXAMPLE_LOG=/logs/refresh.log
+      - JWT_ACCESS_LIFESPAN=30s
+      - JWT_REFRESH_LIFESPAN=2m
 
   blacklist:
     build:
@@ -31,9 +41,17 @@ services:
       dockerfile: example/Dockerfile
     volumes:
       - ../flask_praetorian/:/app/flask_praetorian
-      - ./blacklist.py:/app/example.py
+      - ./:/app
     ports:
       - 5020:5000
+    environment:
+      - FLASK_APP=/app/app_factory.py
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_RUN_PORT=5020
+      - EXAMPLE=blacklist
+      - EXAMPLE_LOG=/logs/blacklist.log
+      - JWT_ACCESS_LIFESPAN=10000d
+      - JWT_REFRESH_LIFESPAN=10000d
 
   custom:
     build:
@@ -41,9 +59,15 @@ services:
       dockerfile: example/Dockerfile
     volumes:
       - ../flask_praetorian/:/app/flask_praetorian
-      - ./custom_claims.py:/app/example.py
+      - ./:/app
     ports:
       - 5030:5000
+    environment:
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_RUN_PORT=5030
+      - FLASK_APP=/app/app_factory.py:create_app
+      - EXAMPLE=custom
+      - EXAMPLE_LOG=/logs/custom.log
 
   register:
     build:
@@ -51,9 +75,20 @@ services:
       dockerfile: example/Dockerfile
     volumes:
       - ../flask_praetorian/:/app/flask_praetorian
-      - ./register.py:/app/example.py
+      - ./:/app
     ports:
       - 5040:5000
+    environment:
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_RUN_PORT=5040
+      - FLASK_APP=/app/app_factory.py:create_app
+      - EXAMPLE=register
+      - EXAMPLE_LOG=/logs/register.log
+      - JWT_ACCESS_LIFESPAN=30s
+      - JWT_REFRESH_LIFESPAN=2m
+      - PRAETORIAN_CONFIRMATION_SENDER=confirmation.sender@praetorian.com
+      - PRAETORIAN_CONFIRMATION_SUBJECT=confirmation for praetorian regristration example
+      - MAIL_SERVER=mailer
 
   tool:
     build:
@@ -61,11 +96,13 @@ services:
       dockerfile: example/Dockerfile
     volumes:
       - ../flask_praetorian/:/app/flask_praetorian
-      - ./api_tool.py:/app/example.py
-      - ./static/:/app/static/
-      - ./templates/:/app/templates/
+      - ./:/app
     ports:
       - 5050:5000
+    environment:
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_RUN_PORT=5050
+      - FLASK_APP=/app/api_tool.py:create_app
 
   mailer:
     image: namshi/smtp

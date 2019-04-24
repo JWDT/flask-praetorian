@@ -1,111 +1,11 @@
 import flask
-import flask_cors
 import flask_praetorian
-import flask_sqlalchemy
-import tempfile
 
-from runner import runner
-
-db = flask_sqlalchemy.SQLAlchemy()
-guard = flask_praetorian.Praetorian()
-cors = flask_cors.CORS()
+from extensions import guard, db
+from users import User
+from basic import login, protected
 
 
-# A generic user model that might be used by an app powered by flask-praetorian
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.Text, unique=True)
-    password = db.Column(db.Text)
-    roles = db.Column(db.Text)
-    is_active = db.Column(db.Boolean, default=True, server_default='true')
-
-    @property
-    def rolenames(self):
-        try:
-            return self.roles.split(',')
-        except Exception:
-            return []
-
-    @classmethod
-    def lookup(cls, username):
-        return cls.query.filter_by(username=username).one_or_none()
-
-    @classmethod
-    def identify(cls, id):
-        return cls.query.get(id)
-
-    @property
-    def identity(self):
-        return self.id
-
-    def is_valid(self):
-        return self.is_active
-
-
-# Initialize flask app for the example
-app = flask.Flask(__name__)
-app.debug = True
-app.config['SECRET_KEY'] = 'top secret'
-app.config['JWT_ACCESS_LIFESPAN'] = {'seconds': 30}
-app.config['JWT_REFRESH_LIFESPAN'] = {'minutes': 2}
-
-# Initialize the flask-praetorian instance for the app
-guard.init_app(app, User)
-
-# Initialize a local database for the example
-local_database = tempfile.NamedTemporaryFile(prefix='local', suffix='.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}'.format(local_database)
-db.init_app(app)
-
-# Initializes CORS so that the api_tool can talk to the example app
-cors.init_app(app)
-
-# Add users for the example
-with app.app_context():
-    db.create_all()
-    db.session.add(User(
-        username='TheDude',
-        password=guard.encrypt_password('abides'),
-    ))
-    db.session.add(User(
-        username='Walter',
-        password=guard.encrypt_password('calmerthanyouare'),
-        roles='admin'
-    ))
-    db.session.add(User(
-        username='Donnie',
-        password=guard.encrypt_password('iamthewalrus'),
-        roles='operator'
-    ))
-    db.session.add(User(
-        username='Maude',
-        password=guard.encrypt_password('andthorough'),
-        roles='operator,admin'
-    ))
-    db.session.commit()
-
-
-# Set up some routes for the example
-
-@app.route('/login', methods=['POST'])
-def login():
-    """
-    Logs a user in by parsing a POST request containing user credentials and
-    issuing a JWT token.
-
-    .. example::
-       $ curl http://localhost:5000/login -X POST \
-         -d '{"username":"Walter","password":"calmerthanyouare"}'
-    """
-    req = flask.request.get_json(force=True)
-    username = req.get('username', None)
-    password = req.get('password', None)
-    user = guard.authenticate(username, password)
-    ret = {'access_token': guard.encode_jwt_token(user)}
-    return (flask.jsonify(ret), 200)
-
-
-@app.route('/refresh', methods=['GET'])
 def refresh():
     """
     Refreshes an existing JWT by creating a new one that is a copy of the old
@@ -117,27 +17,9 @@ def refresh():
     """
     old_token = guard.read_token_from_header()
     new_token = guard.refresh_jwt_token(old_token)
-    ret = {'access_token': new_token}
-    return flask.jsonify(ret), 200
+    return flask.jsonify(access_token=new_token)
 
 
-@app.route('/protected')
-@flask_praetorian.auth_required
-def protected():
-    """
-    A protected endpoint. The auth_required decorator will require a header
-    containing a valid JWT
-
-    .. example::
-       $ curl http://localhost:5000/protected -X GET \
-         -H "Authorization: Bearer <your_token>"
-    """
-    return flask.jsonify(message='protected endpoint (allowed user {})'.format(
-        flask_praetorian.current_user().username,
-    ))
-
-
-@app.route('/disable_user', methods=['POST'])
 @flask_praetorian.auth_required
 @flask_praetorian.roles_required('admin')
 def disable_user():
@@ -156,6 +38,22 @@ def disable_user():
     return flask.jsonify(message='disabled user {}'.format(usr.username))
 
 
-# Run the example
-if __name__ == '__main__':
-    runner(app)
+def register_routes(app):
+    app.add_url_rule(
+        '/login',
+        view_func=login,
+        methods=['POST'],
+    )
+    app.add_url_rule(
+        '/protected',
+        view_func=protected,
+    )
+    app.add_url_rule(
+        '/refresh',
+        view_func=refresh,
+    )
+    app.add_url_rule(
+        '/disable_user',
+        view_func=disable_user,
+        methods=['POST'],
+    )

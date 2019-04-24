@@ -17,8 +17,7 @@ def login():
     username = req.get('username', None)
     password = req.get('password', None)
     user = guard.authenticate(username, password)
-    ret = {'access_token': guard.encode_jwt_token(user)}
-    return (flask.jsonify(ret), 200)
+    return flask.jsonify(access_token=guard.encode_jwt_token(user))
 
 
 @flask_praetorian.auth_required
