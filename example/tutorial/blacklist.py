@@ -2,7 +2,7 @@ import flask
 import flask_praetorian
 
 from extensions import guard
-from basic import login, protected
+from roles import login, protected
 
 blacklist = set()
 
@@ -12,7 +12,6 @@ def is_blacklisted(jti):
 
 
 @flask_praetorian.auth_required
-@flask_praetorian.roles_required('admin')
 def blacklist_token():
     """
     Blacklists an existing JWT by registering its jti claim in the blacklist.

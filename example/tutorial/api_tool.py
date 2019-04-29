@@ -3,9 +3,9 @@ import logging
 import os
 
 
-def basic():
+def roles():
     return flask.render_template(
-        'basic.html',
+        'roles.html',
         scripts=os.listdir(flask.current_app.static_folder),
         api_port=5000,
         access_lifespan=24*60*60,
@@ -70,8 +70,8 @@ def create_app():
         app.logger.addHandler(file_handler)
         app.logger.info("logging to {log_file}".format(log_file=log_file))
 
-    app.add_url_rule('/', view_func=basic)
-    app.add_url_rule('/basic', view_func=basic)
+    app.add_url_rule('/', view_func=roles)
+    app.add_url_rule('/roles', view_func=roles)
     app.add_url_rule('/refresh', view_func=refresh)
     app.add_url_rule('/blacklist', view_func=blacklist)
     app.add_url_rule('/custom', view_func=custom)

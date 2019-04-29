@@ -384,6 +384,9 @@ class Praetorian:
         }
         if is_registration_token:
             payload_parts[IS_REGISTRATION_TOKEN_CLAIM] = True
+        flask.current_app.logger.debug(
+            "Attaching custom claims: {}".format(custom_claims),
+        )
         payload_parts.update(custom_claims)
         return jwt.encode(
             payload_parts, self.encode_key, self.encode_algorithm,

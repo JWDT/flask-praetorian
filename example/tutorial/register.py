@@ -1,10 +1,9 @@
 import flask
-import flask_praetorian
 
 from users import User
 from extensions import guard, db
 
-from basic import login, protected
+from roles import login, protected
 from refresh import refresh, disable_user
 
 

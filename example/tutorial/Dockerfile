@@ -19,6 +19,7 @@ COPY poetry.lock /app/poetry.lock
 COPY pyproject.toml /app/pyproject.toml
 RUN poetry install
 RUN pip install -U flask
-VOLUME /app
+
+RUN mkdir /sqlite_temp
 
 CMD ["flask", "run"]

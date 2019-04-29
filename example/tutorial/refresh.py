@@ -3,7 +3,7 @@ import flask_praetorian
 
 from extensions import guard, db
 from users import User
-from basic import login, protected
+from roles import login, protected
 
 
 def refresh():
@@ -21,7 +21,6 @@ def refresh():
 
 
 @flask_praetorian.auth_required
-@flask_praetorian.roles_required('admin')
 def disable_user():
     """
     Disables a user in the data store

@@ -46,21 +46,21 @@ class User(db.Model):
             db.create_all()
             db.session.add(cls(
                 username='TheDude',
-                password=guard.encrypt_password('abides'),
+                password=guard.hash_password('abides'),
             ))
             db.session.add(cls(
                 username='Walter',
-                password=guard.encrypt_password('calmerthanyouare'),
+                password=guard.hash_password('calmerthanyouare'),
                 roles='admin'
             ))
             db.session.add(cls(
                 username='Donnie',
-                password=guard.encrypt_password('iamthewalrus'),
+                password=guard.hash_password('iamthewalrus'),
                 roles='operator'
             ))
             db.session.add(cls(
                 username='Maude',
-                password=guard.encrypt_password('andthorough'),
+                password=guard.hash_password('andthorough'),
                 roles='operator,admin'
             ))
             db.session.commit()
