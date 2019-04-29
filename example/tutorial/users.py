@@ -47,20 +47,31 @@ class User(db.Model):
             db.session.add(cls(
                 username='TheDude',
                 password=guard.hash_password('abides'),
+                firstname='Jeffrey',
+                nickname='The Dude',
+                surname='Lebowski',
             ))
             db.session.add(cls(
                 username='Walter',
                 password=guard.hash_password('calmerthanyouare'),
-                roles='admin'
+                roles='admin',
+                firstname='Walter',
+                surname='Sobchak',
             ))
             db.session.add(cls(
                 username='Donnie',
                 password=guard.hash_password('iamthewalrus'),
-                roles='operator'
+                roles='operator',
+                firstname='Theodore',
+                nickname='Donny',
+                surname='Kerabatsos',
             ))
             db.session.add(cls(
                 username='Maude',
                 password=guard.hash_password('andthorough'),
-                roles='operator,admin'
+                roles='operator,admin',
+                firstname='Maude',
+                nickname='Mauddie',
+                surname='Lebowski',
             ))
             db.session.commit()

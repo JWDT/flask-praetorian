@@ -5,7 +5,7 @@ import os
 import pendulum
 import tempfile
 
-from extensions import guard, db, cors
+from extensions import guard, db, cors, mail
 from users import User
 
 
@@ -50,6 +50,10 @@ def create_app(config_file=None):
 
     # Add in the users
     User.create_users(app)
+
+    # Add the mail extension if MAIL_SERVER is set
+    if app.config.get('MAIL_SERVER'):
+        mail.init_app(app)
 
     log_file = os.environ.get('EXAMPLE_LOG')
     if log_file is not None:

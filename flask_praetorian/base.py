@@ -641,6 +641,7 @@ class Praetorian:
             )
 
             app = flask.current_app
+            app.logger.debug("Sending verification email to {}".format(email))
             notification['result'] = app.extensions['mail'].send(msg)
 
         return notification
